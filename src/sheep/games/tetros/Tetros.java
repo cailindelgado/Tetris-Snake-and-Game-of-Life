@@ -12,9 +12,22 @@ import sheep.ui.*;
 import java.util.*;
 
 public class Tetros implements Tick, Feature {
+    // class variables
+
     private final Sheet sheet;
     private boolean started = false;
 
+    public final RandomTile randomTile;
+    private int fallingType = 1;
+    private List<CellLocation> contents = new ArrayList<>();
+
+    //class constructor:
+    public Tetros(Sheet sheet, RandomTile randomTile) {
+        this.sheet = sheet;
+        this.randomTile = randomTile;
+    }
+
+    //class methods:
     @Override
     public void register(UI ui) {
         ui.onTick(this);
@@ -26,16 +39,14 @@ public class Tetros implements Tick, Feature {
         ui.onKey("s", "Drop", this.getMove(0));
     }
 
-    private int fallingType = 1;
-    private List<CellLocation> contents = new ArrayList<>();
-
     private boolean isStopper(CellLocation location) {
-        if (location.getRow() > sheet.getRows()) {
+//        if (location.getRow() > sheet.getRows()) { return true; }
+//        if (location.getColumn() >= sheet.getColumns()) { return true; }
+
+        if ((location.getRow() > sheet.getRows()) || (location.getColumn() >= sheet.getColumns())) {
             return true;
         }
-        if (location.getColumn() >= sheet.getColumns()) {
-            return true;
-        }
+//        return false;
         return !sheet.valueAt(location.getRow(), location.getColumn()).getContent().equals("");
     }
 
@@ -55,7 +66,7 @@ public class Tetros implements Tick, Feature {
         }
         unrender();
         for (CellLocation newLoc : newContents) {
-            if (isStopper(newLoc)) {
+            if (isStopper(newLoc)) { //newLoc is a new cell location
                 ununrender(contents);
                 return true;
             }
@@ -67,19 +78,18 @@ public class Tetros implements Tick, Feature {
 
     public void fullDrop() {
         while (!dropTile()) {
-
         }
     }
 
     public void shift(int x) {
-        if (x == 2) {
+        if (x == 0) {
             fullDrop();
         }
         List<CellLocation> newContents = new ArrayList<>();
         for (CellLocation tile : contents) {
-            newContents.add(new CellLocation(tile.getRow(), tile.getColumn() + x + 1));
+            newContents.add(new CellLocation(tile.getRow(), tile.getColumn() + x));
         }
-        if (inBounds(newContents)) {
+        if (!inBounds(newContents)) {
             return;
         }
         unrender();
@@ -99,19 +109,12 @@ public class Tetros implements Tick, Feature {
 
     public void ununrender(List<CellLocation> items) {
         for (CellLocation cell : items) {
-            try {
+            try { // renders each item in the list.
                 sheet.update(cell, new Constant(fallingType));
             } catch (TypeError e) {
                 throw new RuntimeException(e);
             }
         }
-    }
-
-    public final RandomTile randomTile;
-
-    public Tetros(Sheet sheet, RandomTile randomTile) {
-        this.sheet = sheet;
-        this.randomTile = randomTile;
     }
 
     private boolean drop() {
@@ -189,11 +192,12 @@ public class Tetros implements Tick, Feature {
             x += cellLocation.getColumn();
             y += cellLocation.getRow();
         }
-        x /= contents.size(); y /= contents.size();
+        x /= contents.size();
+        y /= contents.size();
         List<CellLocation> newCells = new ArrayList<>();
         for (CellLocation location : contents) {
-            int lx = x + ((y -location.getRow())*direction);
-            int ly = y + ((x -location.getColumn())*direction);
+            int lx = x + ((y - location.getRow()) * direction);
+            int ly = y + ((x - location.getColumn()) * direction);
             CellLocation replacement = new CellLocation(ly, lx);
             newCells.add(replacement);
         }
@@ -221,17 +225,20 @@ public class Tetros implements Tick, Feature {
         return true;
     }
 
+    /**
+     * I believe this clears the sheet
+     */
     private void clear() {
         for (int row = sheet.getRows() - 1; row >= 0; row--) {
             boolean full = true;
-            for (int col = 0 ; col < sheet.getColumns(); col++) {
+            for (int col = 0; col < sheet.getColumns(); col++) {
                 if (sheet.valueAt(row, col).getContent().equals("")) {
                     full = false;
-                }
+                } else { full = true;}
             }
             if (full) {
                 for (int rowX = row; rowX > 0; rowX--) {
-                    for (int col = 0 ; col < sheet.getColumns(); col++) {
+                    for (int col = 0; col < sheet.getColumns(); col++) {
                         try {
                             if (contents.contains(new CellLocation(rowX - 1, col))) {
                                 continue;
@@ -247,15 +254,10 @@ public class Tetros implements Tick, Feature {
         }
     }
 
+
+    //game start stuff
     public Perform getStart() {
         return new GameStart();
-    }
-
-    public Perform getMove(int direction) {
-        return new Move(direction);
-    }
-    public Perform getRotate(int direction) {
-        return new Rotate(direction);
     }
 
     public class GameStart implements Perform {
@@ -264,6 +266,11 @@ public class Tetros implements Tick, Feature {
             started = true;
             drop();
         }
+    }
+
+    //get move stuff
+    public Perform getMove(int direction) {
+        return new Move(direction);
     }
 
     public class Move implements Perform {
@@ -275,11 +282,16 @@ public class Tetros implements Tick, Feature {
 
         @Override
         public void perform(int row, int column, Prompt prompt) {
-            if (!started) {
+            if (!started) { //this method performs an action with a given prompt
                 return;
             }
             shift(direction);
         }
+    }
+
+    //rotate stuff
+    public Perform getRotate(int direction) {
+        return new Rotate(direction);
     }
 
     public class Rotate implements Perform {

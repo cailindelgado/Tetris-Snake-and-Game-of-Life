@@ -171,7 +171,6 @@ public class TetrosTest {
         ));
     }
 
-
     /**
      * Test moving and rotating a tile works as expected.
      */
