@@ -5,4 +5,4 @@ There are 4 Components which need to be implemented
 - [ ] Component #1: File Load & Saving 
 - [ ] Component #2: Conways Game of Life
 - [ ] Component #3: Snake
-- [ ] Component #4: Tetros
+- [X] Component #4: Tetros
