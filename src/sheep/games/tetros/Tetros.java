@@ -24,6 +24,15 @@ public class Tetros implements Tick, Feature {
     private int fallingType = 1;
     private List<CellLocation> contents = new ArrayList<>();
 
+    //TODO ask tutors why checkstyle mad
+    private final Perform GameStart = new Perform() {
+        @Override
+        public void perform(int row, int column, Prompt prompt) {
+            started = true;
+            drop();
+        }
+    };
+
     /**
      * The constructor class
      *
@@ -35,21 +44,31 @@ public class Tetros implements Tick, Feature {
         this.randomTile = randomTile;
     }
 
-    /**
-     * This method overrides the register method in the Feature interface, and
-     * sets moves which are used in the game.
-     *
-     * @param ui A user graphical user interface.
-     */
     @Override
     public void register(UI ui) {
         ui.onTick(this);
-        ui.addFeature("tetros", "Start Tetros", new GameStart());
-        ui.onKey("a", "Move Left", new Move(-1));
-        ui.onKey("d", "Move Right", this.getMove(1));
-        ui.onKey("q", "Rotate Left", new Rotate(-1));
-        ui.onKey("e", "Rotate Right", this.getRotate(1));
-        ui.onKey("s", "Drop", this.getMove(0));
+        ui.addFeature("tetros", "Start Tetros", GameStart);
+        ui.onKey("a", "Move Left", this.getMove(-1, false));
+        ui.onKey("d", "Move Right", this.getMove(1, false));
+        ui.onKey("q", "Rotate Left", this.getMove(-1, true));
+        ui.onKey("e", "Rotate Right", this.getMove(1, true));
+        ui.onKey("s", "Drop", this.getMove(0, false));
+    }
+
+    @Override
+    public boolean onTick(Prompt prompt) {
+        if (!started) {
+            return false;
+        }
+
+        if (dropTile()) {
+            if (drop()) {
+                prompt.message("Game Over!");
+                started = false;
+            }
+        }
+        clear();
+        return true;
     }
 
     /**
@@ -106,24 +125,20 @@ public class Tetros implements Tick, Feature {
     }
 
     /**
-     * This method runs the dropTile method until the tile hits the bottom of the sheet
-     */
-    public void fullDrop() {
-        while (!dropTile()) { }
-    }
-
-    /**
-     * using x, this horizontally translates the tile
+     * using direction, this horizontally translates the tile
      *
-     * @param x 0 if drop, 1 if shift right, -1 if shift left.
+     * @param direction 0 if drop, 1 if shift right, -1 if shift left.
      */
-    public void shift(int x) {
-        if (x == 0) {
-            fullDrop();
+    public void shift(int direction) {
+        if (direction == 0) {
+            boolean tileDropped = false;
+            do {
+                tileDropped = dropTile();
+            } while (!tileDropped);
         }
-       List<CellLocation> newContents = new ArrayList<>();
+        List<CellLocation> newContents = new ArrayList<>();
         for (CellLocation tile : contents) {
-            newContents.add(new CellLocation(tile.getRow(), tile.getColumn() + x));
+            newContents.add(new CellLocation(tile.getRow(), tile.getColumn() + direction));
         }
         if (!inBounds(newContents)) {
             return;
@@ -162,7 +177,6 @@ public class Tetros implements Tick, Feature {
     }
 
     //TODO fix Docstring
-
     /**
      * drops a new tile into the sheet.
      * @return true
@@ -267,25 +281,8 @@ public class Tetros implements Tick, Feature {
         reRender(newCells);
     }
 
-    @Override
-    public boolean onTick(Prompt prompt) {
-        if (!started) {
-            return false;
-        }
-
-        if (dropTile()) {
-            if (drop()) {
-                prompt.message("Game Over!");
-                started = false;
-            }
-        }
-        clear();
-        return true;
-    }
-
-    //FIXME this needs to be fixed, as something is wrong with it.
     /**
-     * This clears lines when a whole line is made, NOTE BUGGY
+     * This method clears a whole row, when it has been completely filled
      */
     private void clear() {
         for (int row = sheet.getRows() - 1; row >= 0; row--) {
@@ -297,7 +294,6 @@ public class Tetros implements Tick, Feature {
                     full--;
                 }
             }
-
             //!(row is full) -> (skip if code)
             if (full == 0) {
                 clearHelper(row);
@@ -307,8 +303,8 @@ public class Tetros implements Tick, Feature {
     }
 
     /**
-     * Helps the clear() method by clearing each cell
-     * @param row
+     * Helps the clear() method by clearing each cell in a given row
+     * @param row the row to clear when full
      */
     private void clearHelper(int row) {
         for (int rowX = row; rowX > 0; rowX--) {
@@ -326,81 +322,24 @@ public class Tetros implements Tick, Feature {
         }
     }
 
-    //TODO Fix this Docstring
-    /**
-     * Starts the game
-     * @return
-     */
-    public Perform getStart() {
-        return new GameStart();
-    }
-
-    /**
-     * TODO class to be removed and shortened so that getStart() can work properly
-     */
-    public class GameStart implements Perform {
-        @Override
-        public void perform(int row, int column, Prompt prompt) {
-            started = true;
-            drop();
-        }
-    }
-
-    //TODO Fix this Docstring
     /**
      * gets the move that the player plays
-     * @param direction
-     * @return
+     * @param direction direction that the move dictates going in
+     * @return A new Move with the given direction
      */
-    public Perform getMove(int direction) {
-        return new Move(direction);
-    }
-
-    /**
-     * TODO class to be removed and shortened so that getMove() can work properly
-     */
-    public class Move implements Perform {
-        private final int direction;
-
-        public Move(int direction) {
-            this.direction = direction;
-        }
-
-        @Override
-        public void perform(int row, int column, Prompt prompt) {
-            if (!started) { //this method performs an action with a given prompt
-                return;
+    public Perform getMove(int direction, boolean rotate) {
+        return new Perform() {
+            @Override
+            public void perform(int row, int column, Prompt prompt) {
+                if (!started) {
+                    return;
+                }
+                if (rotate) {
+                    flip(direction);
+                } else {
+                    shift(direction);
+                }
             }
-            shift(direction);
-        }
-    }
-
-    //TODO Fix this Docstring
-    /**
-     * gets the tile rotation that the player designates
-     * @param direction
-     * @return
-     */
-    public Perform getRotate(int direction) {
-        return new Rotate(direction);
-    }
-
-    /**
-     * TODO class to be removed and shortened so that getStart() can work properly
-     */
-    public class Rotate implements Perform {
-        private final int direction;
-
-        public Rotate(int direction) {
-            this.direction = direction;
-        }
-
-        @Override
-        public void perform(int row, int column, Prompt prompt) {
-            if (!started) {
-                return;
-            }
-            flip(direction);
-        }
+        };
     }
 }

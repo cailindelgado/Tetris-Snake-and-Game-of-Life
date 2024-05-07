@@ -4,7 +4,10 @@ import sheep.expression.CoreFactory;
 import sheep.expression.ExpressionFactory;
 import sheep.features.Feature;
 import sheep.fun.FunException;
+import sheep.games.life.Life;
+import sheep.games.random.RandomFreeCell;
 import sheep.games.random.RandomTetrosTile;
+import sheep.games.snake.Snake;
 import sheep.games.tetros.Tetros;
 import sheep.parsing.Parser;
 import sheep.parsing.SimpleParser;
@@ -38,8 +41,8 @@ public class Main {
         Feature[] features = new Feature[]{
 //                new FileLoading(sheet),
 //                new FileSaving(sheet),
-//                new Life(sheet),
-//                new Snake(sheet, new RandomFreeCell(sheet, new Random())),
+                new Life(sheet),
+                new Snake(sheet, new RandomFreeCell(sheet, new Random())),
                 new Tetros(sheet, new RandomTetrosTile(new Random()))
         };
 
