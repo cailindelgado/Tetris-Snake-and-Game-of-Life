@@ -11,23 +11,36 @@ import sheep.ui.*;
 
 import java.util.*;
 
+/**
+ * A game of Tetros that runs within the sheep.sheet package
+ */
 public class Tetros implements Tick, Feature {
     // class variables
 
     private final Sheet sheet;
     private boolean started = false;
 
-    public final RandomTile randomTile;
+    private final RandomTile randomTile;
     private int fallingType = 1;
     private List<CellLocation> contents = new ArrayList<>();
 
-    //class constructor:
+    /**
+     * The constructor class
+     *
+     * @param sheet      A sheet to run the game on.
+     * @param randomTile A randomTile object to generate random tiles with
+     */
     public Tetros(Sheet sheet, RandomTile randomTile) {
         this.sheet = sheet;
         this.randomTile = randomTile;
     }
 
-    //class methods:
+    /**
+     * This method overrides the register method in the Feature interface, and
+     * sets moves which are used in the game.
+     *
+     * @param ui A user graphical user interface.
+     */
     @Override
     public void register(UI ui) {
         ui.onTick(this);
@@ -39,19 +52,30 @@ public class Tetros implements Tick, Feature {
         ui.onKey("s", "Drop", this.getMove(0));
     }
 
+    /**
+     * this method checks if the given cell location is within the sheet,
+     * or if the
+     *
+     * @param location A location in the sheet
+     * @return true, iff location is within the sheet AND value at that location is empty, false otherwise
+     */
     private boolean isStopper(CellLocation location) {
-//        if (location.getRow() > sheet.getRows()) { return true; }
-//        if (location.getColumn() >= sheet.getColumns()) { return true; }
-
-        if ((location.getRow() > sheet.getRows()) || (location.getColumn() >= sheet.getColumns())) {
+        if ((location.getRow() >= sheet.getRows())
+                || (location.getColumn() >= sheet.getColumns())) {
             return true;
         }
-//        return false;
-        return !sheet.valueAt(location.getRow(), location.getColumn()).getContent().equals("");
+
+        return !sheet.valueAt(location.getRow(), location.getColumn()).getContent().isEmpty();
     }
 
+    /**
+     * checks if the given locations are within the sheet
+     *
+     * @param locations a list of cell locations to check
+     * @return true if all locations are within the sheet, false otherwise
+     */
     public boolean inBounds(List<CellLocation> locations) {
-        for (CellLocation location : locations.subList(3, locations.size())) {
+        for (CellLocation location : locations) {
             if (!sheet.contains(location)) {
                 return false;
             }
@@ -59,45 +83,60 @@ public class Tetros implements Tick, Feature {
         return true;
     }
 
+    /**
+     * This method drops a tile when called
+     *
+     * @return false after shifting a tile down one row, true if it cannot be done.
+     */
     public boolean dropTile() {
         List<CellLocation> newContents = new ArrayList<>();
         for (CellLocation tile : contents) {
             newContents.add(new CellLocation(tile.getRow() + 1, tile.getColumn()));
         }
-        unrender();
+        unRender();
         for (CellLocation newLoc : newContents) {
             if (isStopper(newLoc)) { //newLoc is a new cell location
-                ununrender(contents);
+                reRender(contents);
                 return true;
             }
         }
-        ununrender(newContents);
+        reRender(newContents);
         this.contents = newContents;
         return false;
     }
 
+    /**
+     * This method runs the dropTile method until the tile hits the bottom of the sheet
+     */
     public void fullDrop() {
-        while (!dropTile()) {
-        }
+        while (!dropTile()) { }
     }
 
+    /**
+     * using x, this horizontally translates the tile
+     *
+     * @param x 0 if drop, 1 if shift right, -1 if shift left.
+     */
     public void shift(int x) {
         if (x == 0) {
             fullDrop();
         }
-        List<CellLocation> newContents = new ArrayList<>();
+       List<CellLocation> newContents = new ArrayList<>();
         for (CellLocation tile : contents) {
             newContents.add(new CellLocation(tile.getRow(), tile.getColumn() + x));
         }
         if (!inBounds(newContents)) {
             return;
         }
-        unrender();
-        ununrender(newContents);
+        unRender();
+        reRender(newContents);
         this.contents = newContents;
     }
 
-    public void unrender() {
+    /**
+     * Unrenders the tile when called
+     */
+    public void unRender() {
         for (CellLocation cell : contents) {
             try {
                 sheet.update(cell, new Nothing());
@@ -107,7 +146,12 @@ public class Tetros implements Tick, Feature {
         }
     }
 
-    public void ununrender(List<CellLocation> items) {
+    /**
+     * renders a collection of cell locations in the sheet
+     *
+     * @param items a collection of locations within the sheet to be rendered
+     */
+    public void reRender(List<CellLocation> items) {
         for (CellLocation cell : items) {
             try { // renders each item in the list.
                 sheet.update(cell, new Constant(fallingType));
@@ -117,19 +161,28 @@ public class Tetros implements Tick, Feature {
         }
     }
 
+    //TODO fix Docstring
+
+    /**
+     * drops a new tile into the sheet.
+     * @return true
+     */
     private boolean drop() {
         contents = new ArrayList<>();
         newPiece();
         for (CellLocation location : contents) {
-            if (!sheet.valueAt(location).render().equals("")) {
+            if (!sheet.valueAt(location).render().isEmpty()) {
                 return true;
             }
         }
-        ununrender(contents);
+        reRender(contents);
 
         return false;
     }
 
+    /**
+     * Creates a random new tile to drop
+     */
     private void newPiece() {
         int value = randomTile.pick();
         switch (value) {
@@ -185,6 +238,11 @@ public class Tetros implements Tick, Feature {
         }
     }
 
+    /**
+     * Flips the tile in a given direction?
+     *
+     * @param direction a direction to flip the tile in
+     */
     private void flip(int direction) {
         int x = 0;
         int y = 0;
@@ -204,9 +262,9 @@ public class Tetros implements Tick, Feature {
         if (!inBounds(newCells)) {
             return;
         }
-        unrender();
+        unRender();
         contents = newCells;
-        ununrender(newCells);
+        reRender(newCells);
     }
 
     @Override
@@ -225,41 +283,58 @@ public class Tetros implements Tick, Feature {
         return true;
     }
 
+    //FIXME this needs to be fixed, as something is wrong with it.
     /**
-     * I believe this clears the sheet
+     * This clears lines when a whole line is made, NOTE BUGGY
      */
     private void clear() {
         for (int row = sheet.getRows() - 1; row >= 0; row--) {
             boolean full = true;
+            //go over each row from the bottom and check if it is full
             for (int col = 0; col < sheet.getColumns(); col++) {
-                if (sheet.valueAt(row, col).getContent().equals("")) {
-                    full = false;
-                } else { full = true;}
+                full = !(sheet.valueAt(row, col).getContent().isEmpty());
             }
+
+            //!(row is full) -> (skip if code)
             if (full) {
-                for (int rowX = row; rowX > 0; rowX--) {
-                    for (int col = 0; col < sheet.getColumns(); col++) {
-                        try {
-                            if (contents.contains(new CellLocation(rowX - 1, col))) {
-                                continue;
-                            }
-                            sheet.update(new CellLocation(rowX, col), sheet.valueAt(new CellLocation(rowX - 1, col)));
-                        } catch (TypeError e) {
-                            throw new RuntimeException(e);
-                        }
-                    }
-                }
+                clearHelper(row);
                 row = row + 1;
             }
         }
     }
 
+    /**
+     * Helps the clear() method by clearing each cell
+     * @param row
+     */
+    private void clearHelper(int row) {
+        for (int rowX = row; rowX > 0; rowX--) {
+            for (int col = 0; col < sheet.getColumns(); col++) {
+                try {
+                    if (contents.contains(new CellLocation(rowX - 1, col))) {
+                        continue;
+                    }
+                    sheet.update(new CellLocation(rowX, col),
+                            sheet.valueAt(new CellLocation(rowX - 1, col)));
+                } catch (TypeError e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        }
+    }
 
-    //game start stuff
+    //TODO Fix this Docstring
+    /**
+     * Starts the game
+     * @return
+     */
     public Perform getStart() {
         return new GameStart();
     }
 
+    /**
+     * TODO class to be removed and shortened so that getStart() can work properly
+     */
     public class GameStart implements Perform {
         @Override
         public void perform(int row, int column, Prompt prompt) {
@@ -268,11 +343,19 @@ public class Tetros implements Tick, Feature {
         }
     }
 
-    //get move stuff
+    //TODO Fix this Docstring
+    /**
+     * gets the move that the player plays
+     * @param direction
+     * @return
+     */
     public Perform getMove(int direction) {
         return new Move(direction);
     }
 
+    /**
+     * TODO class to be removed and shortened so that getMove() can work properly
+     */
     public class Move implements Perform {
         private final int direction;
 
@@ -289,11 +372,19 @@ public class Tetros implements Tick, Feature {
         }
     }
 
-    //rotate stuff
+    //TODO Fix this Docstring
+    /**
+     * gets the tile rotation that the player designates
+     * @param direction
+     * @return
+     */
     public Perform getRotate(int direction) {
         return new Rotate(direction);
     }
 
+    /**
+     * TODO class to be removed and shortened so that getStart() can work properly
+     */
     public class Rotate implements Perform {
         private final int direction;
 

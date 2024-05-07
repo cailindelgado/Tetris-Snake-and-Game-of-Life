@@ -90,12 +90,6 @@ public class MockUI extends UI {
         super(view, updater);
     }
 
-    /**
-     * Simulates a press of a given key within the game
-     * @param key the key pressed as a String
-     * @param row the row the key was pressed in
-     * @param column the column the key was pressed in
-     */
     public void simulatePress(String key, int row, int column) {
         List<Feature> bound = keys.get(key);
         for (Feature feature : bound) {
