@@ -289,14 +289,17 @@ public class Tetros implements Tick, Feature {
      */
     private void clear() {
         for (int row = sheet.getRows() - 1; row >= 0; row--) {
-            boolean full = true;
+            int full = sheet.getColumns();
+
             //go over each row from the bottom and check if it is full
             for (int col = 0; col < sheet.getColumns(); col++) {
-                full = !(sheet.valueAt(row, col).getContent().isEmpty());
+                if (!(sheet.valueAt(row, col).getContent().isEmpty())) {
+                    full--;
+                }
             }
 
             //!(row is full) -> (skip if code)
-            if (full) {
+            if (full == 0) {
                 clearHelper(row);
                 row = row + 1;
             }
