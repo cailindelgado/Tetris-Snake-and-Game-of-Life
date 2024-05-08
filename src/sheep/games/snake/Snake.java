@@ -17,14 +17,18 @@ public class Snake implements Tick, Feature {
 
 
     private boolean start = false;
-    //TODO ask tutors why checkstyle mad
-    private final Perform Start = new Perform() {
+    private final Perform startGame = new Perform() {
         @Override
         public void perform(int row, int column, Prompt prompt) {
             start = true;
         }
     };
 
+    /**
+     * Constructor for the snake
+     * @param sheet A sheet upon which the snake is to be played on
+     * @param randomFreeCell
+     */
     public Snake(Sheet sheet, RandomFreeCell randomFreeCell) {
         this.sheet = sheet;
         this.randomFreeCell = randomFreeCell;
@@ -33,7 +37,11 @@ public class Snake implements Tick, Feature {
     @Override
     public void register(UI ui) {
         ui.onTick(this);
-        ui.addFeature("snek", "Start Snake", Start);
+        ui.addFeature("snek", "Start Snake", startGame);
+//        ui.onKey("w", "Move North", this.getMove(-1, false));
+//        ui.onKey("a", "Move West", this.getMove(1, false));
+//        ui.onKey("s", "Rotate South", this.getMove(-1, true));
+//        ui.onKey("d", "Rotate East", this.getMove(1, true));
     }
 
     @Override

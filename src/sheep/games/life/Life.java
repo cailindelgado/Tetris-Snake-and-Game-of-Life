@@ -8,6 +8,8 @@ import sheep.ui.Prompt;
 import sheep.ui.Tick;
 import sheep.ui.UI;
 
+import java.util.ArrayList;
+
 /**
  * Conways game of life.
  * Rules:
@@ -21,6 +23,8 @@ public class Life implements Tick, Feature {
 
     private final Sheet sheet;
     private boolean running;
+    private ArrayList<CellLocation> locationsOn = new ArrayList<>();
+    private ArrayList<CellLocation> locationsOff = new ArrayList<>();
 
     //TODO ask tutors why checkstyle mad
     private final Perform start = new Perform() {
@@ -51,7 +55,7 @@ public class Life implements Tick, Feature {
             return false;
         }
 
-        updateBoard();
+        updateSheet();
 
         return true;
     }
@@ -65,15 +69,16 @@ public class Life implements Tick, Feature {
     }
 
     /**
-     * Updates each cell, depending on whether they
+     * Updates each cell, depending on rules stated.
      */
-    private void updateBoard() {
-        for (int row = 0; row < sheet.getRows(); row++) {
+    private void updateSheet() {
+        for (int row = sheet.getRows() - 1; row >= 0; row--) {
             for (int col = 0; col < sheet.getColumns(); col++) {
+                CellLocation location = new CellLocation(row, col);
                 int neighborsOn = onCounter(row, col);
 
                 //Any cell that is on, with 2 or 3 neighbors on, remains on.
-                if (sheet.valueAt(new CellLocation(row, col)).render().equals("1")
+                if (sheet.valueAt(location).render().equals("1")
                         && neighborsOn == 2) {
                     continue;
                 }
@@ -81,15 +86,20 @@ public class Life implements Tick, Feature {
                 //Any cell that is on, and has less than 2 and more than 3 neighbors that are on,
                 // turns off.
                 if (neighborsOn < 2 || neighborsOn > 3) {
-                    sheet.update(row, col, "");
+                    locationsOff.add(location);
                 }
 
                 //Any cell that is off, with exactly 3 neighbors that are on, turns on.
                 if (neighborsOn == 3) {
-                    sheet.update(row, col, "1");
+                    if (sheet.valueAt(location).render().equals("1")) {
+                        sheet.update(row, col, "1");
+                    } else {
+                        locationsOn.add(location);
+                    }
                 }
             }
         }
+        addLocations();
     }
 
     /**
@@ -116,5 +126,23 @@ public class Life implements Tick, Feature {
         }
         //check if the given cell location is within an existing
         return neighborsOn;
+    }
+
+    /**
+     * Updates the sheet by setting each cell location in locationsOn and locationsOff,
+     * to on/off respectively within the sheet.
+     */
+    private void addLocations() {
+        if (!locationsOn.isEmpty() && !locationsOff.isEmpty()) {
+            for (CellLocation location : locationsOn) {
+                sheet.update(location.getRow(), location.getColumn(), "1");
+            }
+            locationsOn.clear();
+
+            for (CellLocation location : locationsOff) {
+                sheet.update(location.getRow(), location.getColumn(), "");
+            }
+            locationsOff.clear();
+        }
     }
 }
