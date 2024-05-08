@@ -1,6 +1,5 @@
 package sheep.games.life;
 
-import sheep.expression.basic.Constant;
 import sheep.features.Feature;
 import sheep.sheets.CellLocation;
 import sheep.sheets.Sheet;
@@ -24,13 +23,13 @@ public class Life implements Tick, Feature {
     private boolean running;
 
     //TODO ask tutors why checkstyle mad
-    private final Perform Start = new Perform() {
+    private final Perform start = new Perform() {
         @Override
         public void perform(int row, int column, Prompt prompt) {
             running = true;
         }
     };
-    private final Perform End = new Perform() {
+    private final Perform end = new Perform() {
         @Override
         public void perform(int row, int column, Prompt prompt) {
             running = false;
@@ -60,12 +59,14 @@ public class Life implements Tick, Feature {
     @Override
     public void register(UI ui) {
         ui.onTick(this);
-        ui.addFeature("lifeS", "Start Game of Life", Start);
-        ui.addFeature("lifeE", "End Game of Life", End);
+        ui.addFeature("gol-start", "Start Game of Life", start);
+        ui.addFeature("gol-end", "End Game of Life", end);
 
     }
 
-    //FIXME replace the name with something more descriptive
+    /**
+     * Updates each cell, depending on whether they
+     */
     private void updateBoard() {
         for (int row = 0; row < sheet.getRows(); row++) {
             for (int col = 0; col < sheet.getColumns(); col++) {
@@ -91,6 +92,12 @@ public class Life implements Tick, Feature {
         }
     }
 
+    /**
+     * Counts how many cells around the given co-ordinates are on
+     * @param row row location to check around
+     * @param column column location to check around
+     * @return the number of neighbors that are 'on'
+     */
     private int onCounter(int row, int column) {
         int neighborsOn = 0;
         int[][] surroundings = {

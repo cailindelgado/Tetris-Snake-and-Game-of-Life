@@ -25,7 +25,7 @@ public class Tetros implements Tick, Feature {
     private List<CellLocation> contents = new ArrayList<>();
 
     //TODO ask tutors why checkstyle mad
-    private final Perform GameStart = new Perform() {
+    private final Perform gameStart = new Perform() {
         @Override
         public void perform(int row, int column, Prompt prompt) {
             started = true;
@@ -47,7 +47,7 @@ public class Tetros implements Tick, Feature {
     @Override
     public void register(UI ui) {
         ui.onTick(this);
-        ui.addFeature("tetros", "Start Tetros", GameStart);
+        ui.addFeature("tetros", "Start Tetros", gameStart);
         ui.onKey("a", "Move Left", this.getMove(-1, false));
         ui.onKey("d", "Move Right", this.getMove(1, false));
         ui.onKey("q", "Rotate Left", this.getMove(-1, true));
