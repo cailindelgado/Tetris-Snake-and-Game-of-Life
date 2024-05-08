@@ -72,7 +72,7 @@ public class Life implements Tick, Feature {
      * Updates each cell, depending on rules stated.
      */
     private void updateSheet() {
-        for (int row = sheet.getRows() - 1; row >= 0; row--) {
+        for (int row = 0; row < sheet.getRows(); row++) {
             for (int col = 0; col < sheet.getColumns(); col++) {
                 CellLocation location = new CellLocation(row, col);
                 int neighborsOn = onCounter(row, col);
@@ -138,7 +138,9 @@ public class Life implements Tick, Feature {
                 sheet.update(location.getRow(), location.getColumn(), "1");
             }
             locationsOn.clear();
+        }
 
+        if (!locationsOff.isEmpty()) {
             for (CellLocation location : locationsOff) {
                 sheet.update(location.getRow(), location.getColumn(), "");
             }
