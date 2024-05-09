@@ -8,7 +8,7 @@ There are 4 Components which need to be implemented
 - [X] Component #2: Conways Game of Life
 - [ ] Component #3: Snake
   - Bug list
-  - [ ] food spawns on top of snake sometimes
+  - [X] food spawns on top of snake sometimes
   - [ ] if snake super long, and rest of places are food. game freezes
   - also gradescope angry for some reason
 - [X] Component #4: Tetros

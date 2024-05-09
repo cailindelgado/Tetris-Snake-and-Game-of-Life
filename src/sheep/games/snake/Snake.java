@@ -1,5 +1,6 @@
 package sheep.games.snake;
 
+import sheep.expression.basic.Constant;
 import sheep.features.Feature;
 import sheep.games.random.RandomCell;
 import sheep.sheets.CellLocation;
@@ -135,15 +136,13 @@ public class Snake implements Tick, Feature {
 
     // The bug is that randomFreeCell.pick() chooses the next
     private void newFood() {
+        //ensure the sheet has the current snake position rendered so that new food is not on snake
+        for (CellLocation loc : snakeBody) {
+            sheet.update(loc.getRow(), loc.getColumn(), "1");
+        }
+
         CellLocation food = randomCell.pick();
         sheet.update(food.getRow(), food.getColumn(), "2");
         ate = false;
-
-//        //add a check so that it checks if the new food position is going to be on the snake
-//        //choose a new food location so that it is not in the snakes body
-//        while (!sheet.valueAt(food).render().equals("1")) {
-//            food = randomFreeCell.pick();
-//        }
-        //if it is, get new food item
     }
 }
