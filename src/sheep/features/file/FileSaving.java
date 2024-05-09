@@ -6,6 +6,7 @@ import sheep.ui.Perform;
 import sheep.ui.Prompt;
 import sheep.ui.UI;
 
+import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 
@@ -21,11 +22,12 @@ public class FileSaving implements Feature {
         public void perform(int row, int column, Prompt prompt) {
             //save the game state
             try {
-                saver(prompt.ask("Enter file path and name like so filePath/fileName.txt")
-                        .orElse("savedSheet"));
+                saver(prompt.ask("Enter file location: filePath\\fileName.txt")
+                        .orElse("?<:>?")); //is made of forbidden ASCII characters across
             } catch (IOException e) {
                 prompt.message("Error save file failed");
             }
+
         }
     };
 
@@ -36,6 +38,7 @@ public class FileSaving implements Feature {
 
     /**
      * constructor class for FileSaving
+     *
      * @param sheet a sheet to encode
      */
     public FileSaving(Sheet sheet) {
@@ -44,17 +47,17 @@ public class FileSaving implements Feature {
 
     /**
      * encodes and saves the current file state
+     *
      * @param fileLocation a name for the new file
      * @throws IOException when writing to a new file fails
      */
     private void saver(String fileLocation) throws IOException {
-        //savedSheet is only put as fileLocation when user cancels the save.
-        if (fileLocation.equals("savedSheet")) {
-            throw new IOException();
-        }
+        File newSave = new File(fileLocation);
 
-        //create a new write which makes a new file
-        FileWriter writer = new FileWriter(fileLocation, true);
+        //create a new file if DNE, or replace existing one
+        newSave.createNewFile();
+
+        FileWriter writer = new FileWriter(newSave);
 
         //write the encoded sheet to the file
         writer.write(sheet.encode());
