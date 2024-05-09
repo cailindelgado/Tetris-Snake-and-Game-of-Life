@@ -21,7 +21,7 @@ public class Snake implements Tick, Feature {
     private final RandomFreeCell randomFreeCell;
 
     //snake stuff
-    private final int[][] directions = { {-1, 0}, {0, -1}, {1, 0}, {0, 1} };
+    private final int[][] directions = {{-1, 0}, {0, -1}, {1, 0}, {0, 1}};
     private int[] currentDirection = directions[2];
     private final LinkedList<CellLocation> snakeBody = new LinkedList<>();
     private boolean ate = false;
@@ -34,10 +34,11 @@ public class Snake implements Tick, Feature {
             running = true;
 
             //if no cell chosen start at 0,0
-            if (row < 0 && column < 0) {
-                row = column = 0;
+            if (!sheet.contains(new CellLocation(row, column))) {
+                snakeBody.add(new CellLocation(0, 0));
+            } else {
+                snakeBody.add(new CellLocation(row, column));
             }
-            snakeBody.add(new CellLocation(row, column));
         }
     };
 
@@ -91,7 +92,6 @@ public class Snake implements Tick, Feature {
                 if (!running) {
                     return;
                 }
-
                 currentDirection = direction;
             }
         };
@@ -118,9 +118,7 @@ public class Snake implements Tick, Feature {
             sheet.update(snakeBody.getLast().getRow(), snakeBody.getLast().getColumn(), "");
             snakeBody.removeLast();
         } else {
-
-            sheet.update(randomFreeCell.pick().getRow(), randomFreeCell.pick().getColumn(), "2");
-            ate = false;
+            newFood();
         }
 
         if (!sheet.valueAt(newLoc).render().isEmpty()) {
@@ -132,5 +130,19 @@ public class Snake implements Tick, Feature {
 
         //if successful
         return true;
+    }
+
+    // The bug is that randomFreeCell.pick() chooses the next
+    public void newFood() {
+        CellLocation food = randomFreeCell.pick();
+        sheet.update(food.getRow(), food.getColumn(), "2");
+        ate = false;
+
+//        //add a check so that it checks if the new food position is going to be on the snake
+//        //choose a new food location so that it is not in the snakes body
+//        while (!sheet.valueAt(food).render().equals("1")) {
+//            food = randomFreeCell.pick();
+//        }
+        //if it is, get new food item
     }
 }

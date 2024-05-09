@@ -3,6 +3,8 @@ package sheep;
 import sheep.expression.CoreFactory;
 import sheep.expression.ExpressionFactory;
 import sheep.features.Feature;
+import sheep.features.file.FileLoading;
+import sheep.features.file.FileSaving;
 import sheep.fun.FunException;
 import sheep.games.life.Life;
 import sheep.games.random.RandomFreeCell;
@@ -39,8 +41,8 @@ public class Main {
                 factory.createEmpty(), 20, 5);
 
         Feature[] features = new Feature[]{
-//                new FileLoading(sheet),
-//                new FileSaving(sheet),
+                new FileLoading(sheet),
+                new FileSaving(sheet),
                 new Life(sheet),
                 new Snake(sheet, new RandomFreeCell(sheet, new Random())),
                 new Tetros(sheet, new RandomTetrosTile(new Random()))
