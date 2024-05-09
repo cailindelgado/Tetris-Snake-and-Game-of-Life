@@ -39,6 +39,7 @@ public class Snake implements Tick, Feature {
             } else {
                 snakeBody.add(new CellLocation(row, column));
             }
+            sheet.update(snakeBody.getFirst().getRow(), snakeBody.getFirst().getColumn(), "1");
         }
     };
 
