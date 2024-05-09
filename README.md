@@ -9,6 +9,5 @@ There are 4 Components which need to be implemented
 - [ ] Component #3: Snake
   - Bug list
   - [X] food spawns on top of snake sometimes
-  - [ ] if snake super long, and rest of places are food. game freezes
   - also gradescope angry for some reason
 - [X] Component #4: Tetros

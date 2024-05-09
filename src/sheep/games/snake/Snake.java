@@ -1,6 +1,5 @@
 package sheep.games.snake;
 
-import sheep.expression.basic.Constant;
 import sheep.features.Feature;
 import sheep.games.random.RandomCell;
 import sheep.sheets.CellLocation;
@@ -115,6 +114,7 @@ public class Snake implements Tick, Feature {
             return false;
         }
 
+        //Grade-scope error, need to generate food after moved on to next cell
         //if the snake just ate something wait a tick before removing the last tile
         if (!ate) {
             sheet.update(snakeBody.getLast().getRow(), snakeBody.getLast().getColumn(), "");
@@ -142,7 +142,10 @@ public class Snake implements Tick, Feature {
         }
 
         CellLocation food = randomCell.pick();
-        sheet.update(food.getRow(), food.getColumn(), "2");
+
+        if (!sheet.valueAt(food).render().equals("1")) {
+            sheet.update(food.getRow(), food.getColumn(), "2");
+        }
         ate = false;
     }
 }
