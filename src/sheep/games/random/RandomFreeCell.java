@@ -25,7 +25,6 @@ public class RandomFreeCell implements RandomCell {
         return true;
     }
 
-    //
     @Override
     public CellLocation pick() {
         CellLocation location;

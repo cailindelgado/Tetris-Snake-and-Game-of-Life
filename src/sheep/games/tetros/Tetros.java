@@ -24,7 +24,6 @@ public class Tetros implements Tick, Feature {
     private int fallingType = 1;
     private List<CellLocation> contents = new ArrayList<>();
 
-    //TODO ask tutors why checkstyle mad
     private final Perform gameStart = new Perform() {
         @Override
         public void perform(int row, int column, Prompt prompt) {

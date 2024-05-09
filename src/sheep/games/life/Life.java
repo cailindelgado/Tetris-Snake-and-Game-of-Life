@@ -65,7 +65,6 @@ public class Life implements Tick, Feature {
         ui.onTick(this);
         ui.addFeature("gol-start", "Start Game of Life", start);
         ui.addFeature("gol-end", "End Game of Life", end);
-
     }
 
     /**
