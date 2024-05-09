@@ -21,6 +21,11 @@ public class FileLoading implements Feature {
         }
     };
 
+    /*
+   You may assume that the result of calling the sheet's parser will
+   faithfully reconstruct the result of rendering an expression, i.e. parser.parse(exp.render()).equals(exp)
+     */
+
     @Override
     public void register(UI ui) {
         ui.addFeature("load-file", "Load File", loadState);

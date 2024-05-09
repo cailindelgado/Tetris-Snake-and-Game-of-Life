@@ -114,6 +114,7 @@ public class Snake implements Tick, Feature {
             return false;
         }
 
+        //FIXME This needs to be fixed, basically as soon as the food is 'eaten' a new food tile should spawn
         //Grade-scope error, need to generate food after moved on to next cell
         //if the snake just ate something wait a tick before removing the last tile
         if (!ate) {

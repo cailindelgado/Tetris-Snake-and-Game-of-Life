@@ -6,6 +6,10 @@ import sheep.ui.Perform;
 import sheep.ui.Prompt;
 import sheep.ui.UI;
 
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.Reader;
 import java.util.Optional;
 
 /**
@@ -19,8 +23,11 @@ public class FileSaving implements Feature {
         @Override
         public void perform(int row, int column, Prompt prompt) {
             //save the game state
-            System.out.println("Saving current sheet state");
-            saver(prompt.ask("File name"));
+            try {
+                saver(prompt.ask("File name").orElse("savedSheet"));
+            } catch (IOException e) {
+                prompt.message("Error save file failed");
+            }
         }
     };
 
@@ -33,7 +40,22 @@ public class FileSaving implements Feature {
         this.sheet = sheet;
     }
 
-    private void saver(Optional<String> filename) {
-        System.out.println(sheet.encode());
+    /**
+     * encodes and saves the current file state
+     * @param filename a name for the new file
+     * @throws IOException when writing to a new file fails
+     */
+    private void saver(String filename) throws IOException {
+        //get path for file
+        String currentDirectory = System.getProperty("user.dir") + "/src/sheep/features/file/";
+
+        //create a new write which makes a new file
+        FileWriter writer = new FileWriter(currentDirectory + filename, true);
+
+        //write the encoded sheet to the file
+        writer.write(sheet.encode());
+
+        //close the encoder
+        writer.close();
     }
 }
