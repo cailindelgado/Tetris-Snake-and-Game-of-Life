@@ -1,7 +1,7 @@
 package sheep.games.snake;
 
 import sheep.features.Feature;
-import sheep.games.random.RandomFreeCell;
+import sheep.games.random.RandomCell;
 import sheep.sheets.CellLocation;
 import sheep.sheets.Sheet;
 import sheep.ui.Perform;
@@ -18,7 +18,7 @@ public class Snake implements Tick, Feature {
 
     //setup
     private final Sheet sheet;
-    private final RandomFreeCell randomFreeCell;
+    private final RandomCell randomCell;
 
     //snake stuff
     private final int[][] directions = {{-1, 0}, {0, -1}, {1, 0}, {0, 1}};
@@ -46,12 +46,12 @@ public class Snake implements Tick, Feature {
      * Constructor for the snake
      *
      * @param sheet          A sheet upon which the snake is to be played on
-     * @param randomFreeCell A random cell instance which is used to create a new berry
+     * @param randomCell A random cell instance which is used to create a new berry
      *                       when one disappears on the sheet
      */
-    public Snake(Sheet sheet, RandomFreeCell randomFreeCell) {
+    public Snake(Sheet sheet, RandomCell randomCell) {
         this.sheet = sheet;
-        this.randomFreeCell = randomFreeCell;
+        this.randomCell = randomCell;
     }
 
     @Override
@@ -133,8 +133,8 @@ public class Snake implements Tick, Feature {
     }
 
     // The bug is that randomFreeCell.pick() chooses the next
-    public void newFood() {
-        CellLocation food = randomFreeCell.pick();
+    private void newFood() {
+        CellLocation food = randomCell.pick();
         sheet.update(food.getRow(), food.getColumn(), "2");
         ate = false;
 
