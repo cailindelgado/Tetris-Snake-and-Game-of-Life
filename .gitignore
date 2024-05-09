@@ -36,8 +36,3 @@ build/
 
 ### Mac OS ###
 .DS_Store
-
-### CSSE2002 ###
-*
-!src/sheep/features/
-!src/sheep/games/
