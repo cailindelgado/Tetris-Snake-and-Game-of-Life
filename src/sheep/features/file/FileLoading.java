@@ -23,7 +23,10 @@ public class FileLoading implements Feature {
 
     private final Sheet sheet;
     private final SimpleParser parser = new SimpleParser(new CoreFactory());
-    private boolean dimensionsUpdated = false;
+
+    private Expression[][] newSheet;
+    private int rows = 0;
+    private int columns = 1;
 
     private final Perform loadState = new Perform() {
         @Override
@@ -59,49 +62,73 @@ public class FileLoading implements Feature {
      * @throws IOException if there is an error while reading from the file
      */
     private void loader(String fileLocation) throws IOException {
+        setRows(fileLocation);
+
+        populateNewSheet(fileLocation);
+
+        updateThisSheet();
+    }
+
+    /**
+     * Sets up the new sheet, so that it is the same size of what is to be loaded
+     *
+     * @param fileLocation the file to read from
+     * @throws IOException if the reader has issues
+     */
+    private void setRows(String fileLocation) throws IOException {
+        BufferedReader reader = new BufferedReader(new FileReader(fileLocation));
+
+        columns = reader.readLine().split("[|]", -1).length;
+
+        while (reader.readLine() != null) {
+            rows++;
+        }
+        reader.close();
+
+        newSheet = new Expression[rows][columns];
+    }
+
+    /**
+     * populates the newSheet array with the information from the given file
+     */
+    private void populateNewSheet(String fileLocation) throws IOException {
         //create a new reader to read the given file
         BufferedReader reader = new BufferedReader(new FileReader(fileLocation));
 
-        //clear the sheet before uploading
-        sheet.clear();
+        for (int row = 0; row < newSheet.length; row++) {
+            String[] lineBits = reader.readLine().split("[|]", -1);
 
-        String fileLine;
-        int row = 0;
-
-        while ((fileLine = reader.readLine()) != null) {
-            String[] lineBits = fileLine.split("[|]");
-
-            //if the sheets dimensions haven't been updated yet
-            if (!dimensionsUpdated) {
-                dimensionsUpdated = true;
-                sheet.updateDimensions(Integer.parseInt(String.valueOf(reader.lines().count())) + 1,
-                        lineBits.length);
+            for (int col = 0; col < lineBits.length; col++) {
+                //try to parse the cell info
+                try {
+                    Expression result = parser.parse(lineBits[col]);
+                    newSheet[row][col] = result;
+                } catch (ParseException e) {
+                    throw new IOException();
+                }
             }
-
-            fillRow(row++, lineBits);
         }
 
         //close the reader to prevent any mishaps
         reader.close();
     }
 
-    private void fillRow(int row, String[] rowCells) throws IOException {
-        for (int pos = 0; pos < rowCells.length; pos++) {
+    /**
+     * clears the current sheet, and updates each cell according to what is in newSheet
+     * @throws IOException is thrown when there is a problem with updating the sheet
+     */
+    private void updateThisSheet() throws IOException {
+        //clear the sheet before uploading
+        sheet.clear();
 
-            //try to parse the bit
-            try {
-                CellLocation loc = new CellLocation(row, pos);
-                Expression result = parser.parse(rowCells[pos]);
-
+        for (int row = 0; row < rows; row++) {
+            for (int column = 0; column < columns; column++) {
                 try {
-                    sheet.update(loc, result);
+                    sheet.update(new CellLocation(row, column), newSheet[row][column]);
                 } catch (TypeError error) {
-                    throw new ParseException();
+                    throw new IOException();
                 }
-            } catch (ParseException e) {
-                throw new IOException();
             }
-
         }
     }
 }

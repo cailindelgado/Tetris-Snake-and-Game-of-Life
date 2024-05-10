@@ -135,7 +135,6 @@ public class Snake implements Tick, Feature {
         return true;
     }
 
-    // The bug is that randomFreeCell.pick() chooses the next
     private void newFood() {
         //ensure the sheet has the current snake position rendered so that new food is not on snake
         for (CellLocation loc : snakeBody) {

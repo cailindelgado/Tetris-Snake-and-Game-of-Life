@@ -27,7 +27,6 @@ public class FileSaving implements Feature {
             } catch (IOException e) {
                 prompt.message("Error save file failed");
             }
-
         }
     };
 
