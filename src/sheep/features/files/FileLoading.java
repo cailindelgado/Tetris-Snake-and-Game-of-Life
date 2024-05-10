@@ -121,6 +121,8 @@ public class FileLoading implements Feature {
         //clear the sheet before uploading
         sheet.clear();
 
+        sheet.updateDimensions(rows, columns);
+
         for (int row = 0; row < newSheet.length; row++) {
             for (int column = 0; column < columns; column++) {
                 if (!newSheet[row][column].render().isEmpty()) {
