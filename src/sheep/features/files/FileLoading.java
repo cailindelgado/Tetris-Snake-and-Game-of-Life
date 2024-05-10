@@ -25,8 +25,8 @@ public class FileLoading implements Feature {
     private final SimpleParser parser = new SimpleParser(new CoreFactory());
 
     private Expression[][] newSheet;
-    private int rows = 1;
-    private int columns = 0;
+    private int rows;
+    private int columns;
 
     private final Perform loadState = new Perform() {
         @Override
@@ -76,6 +76,10 @@ public class FileLoading implements Feature {
      * @throws IOException if the reader has issues
      */
     private void setRows(String fileLocation) throws IOException {
+        //ensure rows and columns are reset to default values to allow loading more than once
+        rows = 1;
+        columns = 0;
+
         BufferedReader reader = new BufferedReader(new FileReader(fileLocation));
 
         columns = reader.readLine().split("[|]", -1).length;
@@ -95,7 +99,7 @@ public class FileLoading implements Feature {
         //create a new reader to read the given file
         BufferedReader reader = new BufferedReader(new FileReader(fileLocation));
 
-        for (int row = 0; row < newSheet.length; row++) {
+        for (int row = 0; row < rows; row++) {
             String[] lineBits = reader.readLine().split("[|]", -1);
 
             for (int col = 0; col < lineBits.length; col++) {
