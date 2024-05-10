@@ -25,8 +25,8 @@ public class FileLoading implements Feature {
     private final SimpleParser parser = new SimpleParser(new CoreFactory());
 
     private Expression[][] newSheet;
-    private int rows = 0;
-    private int columns = 1;
+    private int rows = 1;
+    private int columns = 0;
 
     private final Perform loadState = new Perform() {
         @Override
@@ -121,12 +121,14 @@ public class FileLoading implements Feature {
         //clear the sheet before uploading
         sheet.clear();
 
-        for (int row = 0; row < rows; row++) {
+        for (int row = 0; row < newSheet.length; row++) {
             for (int column = 0; column < columns; column++) {
-                try {
-                    sheet.update(new CellLocation(row, column), newSheet[row][column]);
-                } catch (TypeError error) {
-                    throw new IOException();
+                if (!newSheet[row][column].render().isEmpty()) {
+                    try {
+                        sheet.update(new CellLocation(row, column), newSheet[row][column]);
+                    } catch (TypeError error) {
+                        throw new IOException();
+                    }
                 }
             }
         }
