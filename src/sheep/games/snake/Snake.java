@@ -135,6 +135,9 @@ public class Snake implements Tick, Feature {
         return true;
     }
 
+    /**
+     * Deals with the generation and handling of a new edible cell for the snake
+     */
     private void newFood() {
         //ensure the sheet has the current snake position rendered so that new food is not on snake
         for (CellLocation loc : snakeBody) {
