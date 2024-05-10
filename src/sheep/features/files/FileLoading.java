@@ -1,4 +1,4 @@
-package sheep.features.file;
+package sheep.features.files;
 
 import sheep.expression.CoreFactory;
 import sheep.expression.Expression;
