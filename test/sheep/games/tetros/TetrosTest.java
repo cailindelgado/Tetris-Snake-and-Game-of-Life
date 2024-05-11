@@ -48,6 +48,7 @@ public class TetrosTest {
         ui = new MockUI(sheet, sheet);
 
         picker = new PickPiece();
+
         Feature game = new Tetros(sheet, picker);
         game.register(ui);
     }
