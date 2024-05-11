@@ -32,17 +32,6 @@ public class Tetros implements Tick, Feature {
         }
     };
 
-    /**
-     * The constructor class
-     *
-     * @param sheet      A sheet to run the game on.
-     * @param randomTile A randomTile object to generate random tiles with
-     */
-    public Tetros(Sheet sheet, RandomTile randomTile) {
-        this.sheet = sheet;
-        this.randomTile = randomTile;
-    }
-
     @Override
     public void register(UI ui) {
         ui.onTick(this);
@@ -52,6 +41,17 @@ public class Tetros implements Tick, Feature {
         ui.onKey("q", "Rotate Left", this.getMove(-1, true));
         ui.onKey("e", "Rotate Right", this.getMove(1, true));
         ui.onKey("s", "Drop", this.getMove(0, false));
+    }
+
+    /**
+     * The constructor class
+     *
+     * @param sheet      A sheet to run the game on.
+     * @param randomTile A randomTile object to generate random tiles with
+     */
+    public Tetros(Sheet sheet, RandomTile randomTile) {
+        this.sheet = sheet;
+        this.randomTile = randomTile;
     }
 
     @Override
@@ -67,37 +67,6 @@ public class Tetros implements Tick, Feature {
             }
         }
         clear();
-        return true;
-    }
-
-    /**
-     * this method checks if the given cell location is within the sheet,
-     * or if the
-     *
-     * @param location A location in the sheet
-     * @return true, iff location is within the sheet AND value at that location is empty, false otherwise
-     */
-    private boolean isStopper(CellLocation location) {
-        if ((location.getRow() >= sheet.getRows())
-                || (location.getColumn() >= sheet.getColumns())) {
-            return true;
-        }
-
-        return !sheet.valueAt(location.getRow(), location.getColumn()).getContent().isEmpty();
-    }
-
-    /**
-     * checks if the given locations are within the sheet
-     *
-     * @param locations a list of cell locations to check
-     * @return true if all locations are within the sheet, false otherwise
-     */
-    public boolean inBounds(List<CellLocation> locations) {
-        for (CellLocation location : locations) {
-            if (!sheet.contains(location)) {
-                return false;
-            }
-        }
         return true;
     }
 
@@ -121,30 +90,6 @@ public class Tetros implements Tick, Feature {
         reRender(newContents);
         this.contents = newContents;
         return false;
-    }
-
-    /**
-     * using direction, this horizontally translates the tile
-     *
-     * @param direction 0 if drop, 1 if shift right, -1 if shift left.
-     */
-    public void shift(int direction) {
-        if (direction == 0) {
-            boolean tileDropped = false;
-            do {
-                tileDropped = dropTile();
-            } while (!tileDropped);
-        }
-        List<CellLocation> newContents = new ArrayList<>();
-        for (CellLocation tile : contents) {
-            newContents.add(new CellLocation(tile.getRow(), tile.getColumn() + direction));
-        }
-        if (!inBounds(newContents)) {
-            return;
-        }
-        unRender();
-        reRender(newContents);
-        this.contents = newContents;
     }
 
     /**
@@ -175,10 +120,9 @@ public class Tetros implements Tick, Feature {
         }
     }
 
-    //TODO fix Docstring
     /**
      * drops a new tile into the sheet.
-     * @return true
+     * @return true if the tile's spawn location is full
      */
     private boolean drop() {
         contents = new ArrayList<>();
@@ -191,93 +135,6 @@ public class Tetros implements Tick, Feature {
         reRender(contents);
 
         return false;
-    }
-
-    /**
-     * Creates a random new tile to drop
-     */
-    private void newPiece() {
-        int value = randomTile.pick();
-        switch (value) {
-            case 1 -> {
-                contents.add(new CellLocation(0, 0));
-                contents.add(new CellLocation(1, 0));
-                contents.add(new CellLocation(2, 0));
-                contents.add(new CellLocation(2, 1));
-                fallingType = 7;
-            }
-            case 2 -> {
-                contents.add(new CellLocation(0, 1));
-                contents.add(new CellLocation(1, 1));
-                contents.add(new CellLocation(2, 1));
-                contents.add(new CellLocation(2, 0));
-                fallingType = 5;
-            }
-            case 3 -> {
-                contents.add(new CellLocation(0, 0));
-                contents.add(new CellLocation(0, 1));
-                contents.add(new CellLocation(0, 2));
-                contents.add(new CellLocation(1, 1));
-                fallingType = 8;
-            }
-            case 4 -> {
-                contents.add(new CellLocation(0, 0));
-                contents.add(new CellLocation(0, 1));
-                contents.add(new CellLocation(1, 0));
-                contents.add(new CellLocation(1, 1));
-                fallingType = 3;
-            }
-            case 5 -> {
-                contents.add(new CellLocation(0, 0));
-                contents.add(new CellLocation(1, 0));
-                contents.add(new CellLocation(2, 0));
-                contents.add(new CellLocation(3, 0));
-                fallingType = 6;
-            }
-            case 6 -> {
-                contents.add(new CellLocation(0, 1));
-                contents.add(new CellLocation(0, 2));
-                contents.add(new CellLocation(1, 1));
-                contents.add(new CellLocation(0, 1));
-                fallingType = 2;
-            }
-            case 0 -> {
-                contents.add(new CellLocation(0, 0));
-                contents.add(new CellLocation(0, 1));
-                contents.add(new CellLocation(1, 1));
-                contents.add(new CellLocation(1, 2));
-                fallingType = 4;
-            }
-        }
-    }
-
-    /**
-     * Flips the tile in a given direction?
-     *
-     * @param direction a direction to flip the tile in
-     */
-    private void flip(int direction) {
-        int x = 0;
-        int y = 0;
-        for (CellLocation cellLocation : contents) {
-            x += cellLocation.getColumn();
-            y += cellLocation.getRow();
-        }
-        x /= contents.size();
-        y /= contents.size();
-        List<CellLocation> newCells = new ArrayList<>();
-        for (CellLocation location : contents) {
-            int lx = x + ((y - location.getRow()) * direction);
-            int ly = y + ((x - location.getColumn()) * direction);
-            CellLocation replacement = new CellLocation(ly, lx);
-            newCells.add(replacement);
-        }
-        if (!inBounds(newCells)) {
-            return;
-        }
-        unRender();
-        contents = newCells;
-        reRender(newCells);
     }
 
     /**
@@ -340,5 +197,152 @@ public class Tetros implements Tick, Feature {
                 }
             }
         };
+    }
+
+    /**
+     * using direction, this horizontally translates the tile
+     *
+     * @param direction 0 if drop, 1 if shift right, -1 if shift left.
+     */
+    public void shift(int direction) {
+        if (direction == 0) {
+            boolean tileDropped = false;
+            do {
+                tileDropped = dropTile();
+            } while (!tileDropped);
+        }
+
+        List<CellLocation> newContents = new ArrayList<>();
+
+        for (CellLocation tile : contents) {
+            newContents.add(new CellLocation(tile.getRow(), tile.getColumn() + direction));
+        }
+
+        if (inBounds(newContents)) {
+            unRender();
+            reRender(newContents);
+            this.contents = newContents;
+        }
+    }
+
+    /**
+     * this method checks if the given cell location is within the sheet,
+     * or if the
+     *
+     * @param location A location in the sheet
+     * @return true, iff location is within the sheet AND value at that location is empty, false otherwise
+     */
+    private boolean isStopper(CellLocation location) {
+        if ((location.getRow() >= sheet.getRows())
+                || (location.getColumn() >= sheet.getColumns())) {
+            return true;
+        }
+
+        return !sheet.valueAt(location.getRow(), location.getColumn()).getContent().isEmpty();
+    }
+
+    /**
+     * Flips the tile in a given direction?
+     *
+     * @param direction a direction to flip the tile in
+     */
+    private void flip(int direction) {
+        int x = 0;
+        int y = 0;
+
+        for (CellLocation cellLocation : contents) {
+            x += cellLocation.getColumn();
+            y += cellLocation.getRow();
+        }
+        x /= contents.size();
+        y /= contents.size();
+        List<CellLocation> newCells = new ArrayList<>();
+
+        for (CellLocation location : contents) {
+            int lx = x + ((y - location.getRow()) * direction);
+            int ly = y + ((x - location.getColumn()) * direction);
+            CellLocation replacement = new CellLocation(ly, lx);
+            newCells.add(replacement);
+        }
+
+        //check if the flipped tile is within the sheet
+        if (inBounds(newCells)) {
+            unRender();
+            contents = newCells;
+            reRender(newCells);
+        }
+    }
+
+    /**
+     * checks if the given locations are within the sheet
+     *
+     * @param locations a list of cell locations to check
+     * @return true if all locations are within the sheet, false otherwise
+     */
+    public boolean inBounds(List<CellLocation> locations) {
+        for (CellLocation location : locations) {
+            if (!sheet.contains(location)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /**
+     * Creates a random new tile to drop
+     */
+    private void newPiece() {
+        int value = randomTile.pick();
+        switch (value) {
+            case 1 -> {
+                contents.add(new CellLocation(0, 0));
+                contents.add(new CellLocation(1, 0));
+                contents.add(new CellLocation(2, 0));
+                contents.add(new CellLocation(2, 1));
+                fallingType = 7;
+            }
+            case 2 -> {
+                contents.add(new CellLocation(0, 1));
+                contents.add(new CellLocation(1, 1));
+                contents.add(new CellLocation(2, 1));
+                contents.add(new CellLocation(2, 0));
+                fallingType = 5;
+            }
+            case 3 -> {
+                contents.add(new CellLocation(0, 0));
+                contents.add(new CellLocation(0, 1));
+                contents.add(new CellLocation(0, 2));
+                contents.add(new CellLocation(1, 1));
+                fallingType = 8;
+            }
+            case 4 -> {
+                contents.add(new CellLocation(0, 0));
+                contents.add(new CellLocation(0, 1));
+                contents.add(new CellLocation(1, 0));
+                contents.add(new CellLocation(1, 1));
+                fallingType = 3;
+            }
+            case 5 -> {
+                contents.add(new CellLocation(0, 0));
+                contents.add(new CellLocation(1, 0));
+                contents.add(new CellLocation(2, 0));
+                contents.add(new CellLocation(3, 0));
+                fallingType = 6;
+            }
+            case 6 -> {
+                contents.add(new CellLocation(0, 1));
+                contents.add(new CellLocation(0, 2));
+                contents.add(new CellLocation(1, 1));
+                contents.add(new CellLocation(0, 1));
+                fallingType = 2;
+            }
+            case 0 -> {
+                contents.add(new CellLocation(0, 0));
+                contents.add(new CellLocation(0, 1));
+                contents.add(new CellLocation(1, 1));
+                contents.add(new CellLocation(1, 2));
+                fallingType = 4;
+            }
+        }
     }
 }
