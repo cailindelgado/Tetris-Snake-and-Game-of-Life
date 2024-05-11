@@ -7,10 +7,10 @@ There are 4 Components which need to be implemented
   - [X] File Loading
     - [X] file cannot be loaded twice
 - [X] Component #2: Conways Game of Life
-- [ ] Component #3: Snake
+- [X] Component #3: Snake
   - Bug list
   - [X] food spawns on top of snake sometimes
-  - [ ] fix Grade-scope failed test: food should spawn after snake 'head' lands on tile, within same tick
+  - [X] fix Grade-scope failed test: food should spawn after snake 'head' lands on tile, within same tick
 - [ ] Component #4: Tetros
   - [X] Debugging
   - [ ] Refactor
