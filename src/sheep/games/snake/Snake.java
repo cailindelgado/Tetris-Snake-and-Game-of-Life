@@ -46,9 +46,9 @@ public class Snake implements Tick, Feature {
     /**
      * Constructor for the snake
      *
-     * @param sheet          A sheet upon which the snake is to be played on
+     * @param sheet      A sheet upon which the snake is to be played on
      * @param randomCell A random cell instance which is used to create a new berry
-     *                       when one disappears on the sheet
+     *                   when one disappears on the sheet
      */
     public Snake(Sheet sheet, RandomCell randomCell) {
         this.sheet = sheet;
@@ -114,18 +114,17 @@ public class Snake implements Tick, Feature {
             return false;
         }
 
-        //FIXME This needs to be fixed, basically as soon as the food is 'eaten' a new food tile should spawn
-        //Grade-scope error, need to generate food after moved on to next cell
         //if the snake just ate something wait a tick before removing the last tile
         if (!ate) {
             sheet.update(snakeBody.getLast().getRow(), snakeBody.getLast().getColumn(), "");
             snakeBody.removeLast();
         } else {
-            newFood();
+            ate = false;
         }
 
         if (!sheet.valueAt(newLoc).render().isEmpty()) {
             ate = true;
+            newFood();
         }
 
         snakeBody.addFirst(newLoc);
@@ -139,16 +138,10 @@ public class Snake implements Tick, Feature {
      * Deals with the generation and handling of a new edible cell for the snake
      */
     private void newFood() {
-        //ensure the sheet has the current snake position rendered so that new food is not on snake
-        for (CellLocation loc : snakeBody) {
-            sheet.update(loc.getRow(), loc.getColumn(), "1");
-        }
-
         CellLocation food = randomCell.pick();
 
         if (!sheet.valueAt(food).render().equals("1")) {
             sheet.update(food.getRow(), food.getColumn(), "2");
         }
-        ate = false;
     }
 }
