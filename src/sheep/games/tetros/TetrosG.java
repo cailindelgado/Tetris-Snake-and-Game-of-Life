@@ -10,22 +10,22 @@ import sheep.sheets.Sheet;
 import java.util.*;
 
 /**
- * The game logic of the Tetros game without the UI components
+ * The game logic (GL) of the Tetros game without the UI components
  */
-public class TetrosGame {
+public class TetrosG {
 
     private final Sheet sheet;
     private final RandomTile randomTile;
 
     private int fallingType = 1;
-    private List<CellLocation> contents = new ArrayList<>();
+    private List<CellLocation> tile = new ArrayList<>();
 
     /**
      * constructor for the tetros game
      *
      * @param sheet a sheet upon the tetros game logic will work on
      */
-    public TetrosGame(Sheet sheet, RandomTile randomTile) {
+    public TetrosG(Sheet sheet, RandomTile randomTile) {
         this.sheet = sheet;
         this.randomTile = randomTile;
     }
@@ -36,20 +36,22 @@ public class TetrosGame {
      * @return false after shifting a tile down one row, true if it cannot be done.
      */
     public boolean dropTile() {
-        List<CellLocation> newContents = new ArrayList<>();
-        for (CellLocation tile : contents) {
-            newContents.add(new CellLocation(tile.getRow() + 1, tile.getColumn()));
+        List<CellLocation> newTile = new ArrayList<>();
+        for (CellLocation tilePart : tile) {
+            newTile.add(new CellLocation(tilePart.getRow() + 1, tilePart.getColumn()));
         }
+
         unRender();
-        for (CellLocation newLoc : newContents) {
-            if (isStopper(newLoc)) { //newLoc is a new cell location
-                render(contents);
+
+        for (CellLocation newLoc : newTile) {
+            if (stopper(newLoc)) { //newLoc is a new cell location
+                render(tile);
                 return true;
             }
         }
 
-        render(newContents);
-        this.contents = newContents;
+        render(newTile);
+        tile = newTile;
         return false;
     }
 
@@ -57,9 +59,9 @@ public class TetrosGame {
      * Unrenders the tile when called
      */
     public void unRender() {
-        for (CellLocation cell : contents) {
+        for (CellLocation tilePart : tile) {
             try {
-                sheet.update(cell, new Nothing());
+                sheet.update(tilePart, new Nothing());
             } catch (TypeError e) {
                 throw new RuntimeException(e);
             }
@@ -69,12 +71,12 @@ public class TetrosGame {
     /**
      * renders a collection of cell locations in the sheet
      *
-     * @param items a collection of locations within the sheet to be rendered
+     * @param tile a collection of locations within the sheet to be rendered
      */
-    public void render(List<CellLocation> items) {
-        for (CellLocation cell : items) {
-            try { // renders each item in the list.
-                sheet.update(cell, new Constant(fallingType));
+    public void render(List<CellLocation> tile) {
+        for (CellLocation tilePart : tile) {
+            try {
+                sheet.update(tilePart, new Constant(fallingType));
             } catch (TypeError e) {
                 throw new RuntimeException(e);
             }
@@ -87,14 +89,14 @@ public class TetrosGame {
      * @return true if the tile's spawn location is full
      */
     public boolean drop() {
-        contents = new ArrayList<>();
+        tile = new ArrayList<>();
         newPiece();
-        for (CellLocation location : contents) {
-            if (!sheet.valueAt(location).render().isEmpty()) {
+        for (CellLocation tilePart : tile) {
+            if (!sheet.valueAt(tilePart).render().isEmpty()) {
                 return true;
             }
         }
-        render(contents);
+        render(tile);
 
         return false;
     }
@@ -129,10 +131,12 @@ public class TetrosGame {
     private void clearHelper(int row) {
         for (int rowX = row; rowX > 0; rowX--) {
             for (int col = 0; col < sheet.getColumns(); col++) {
+
+                if (tile.contains(new CellLocation(rowX - 1, col))) {
+                    continue;
+                }
+
                 try {
-                    if (contents.contains(new CellLocation(rowX - 1, col))) {
-                        continue;
-                    }
                     sheet.update(new CellLocation(rowX, col),
                             sheet.valueAt(new CellLocation(rowX - 1, col)));
                 } catch (TypeError e) {
@@ -143,7 +147,7 @@ public class TetrosGame {
     }
 
     /**
-     * using direction, this horizontally translates the tile
+     * Horizontally translates the tile with the given direction
      *
      * @param direction 0 if drop, 1 if shift right, -1 if shift left.
      */
@@ -155,27 +159,27 @@ public class TetrosGame {
             } while (!tileDropped);
         }
 
-        List<CellLocation> newContents = new ArrayList<>();
+        List<CellLocation> newTile = new ArrayList<>();
 
-        for (CellLocation tile : contents) {
-            newContents.add(new CellLocation(tile.getRow(), tile.getColumn() + direction));
+        for (CellLocation tilePart : tile) {
+            newTile.add(new CellLocation(tilePart.getRow(), tilePart.getColumn() + direction));
         }
 
-        if (inBounds(newContents)) {
+        if (inBounds(newTile)) {
             unRender();
-            render(newContents);
-            this.contents = newContents;
+            render(newTile);
+            this.tile = newTile;
         }
     }
 
     /**
      * this method checks if the given cell location is within the sheet,
-     * or if the
+     * or if the value at that location is empty
      *
      * @param location A location in the sheet
      * @return true, iff location is within the sheet AND value at that location is empty, false otherwise
      */
-    private boolean isStopper(CellLocation location) {
+    private boolean stopper(CellLocation location) {
         if ((location.getRow() >= sheet.getRows())
                 || (location.getColumn() >= sheet.getColumns())) {
             return true;
@@ -187,31 +191,31 @@ public class TetrosGame {
     /**
      * Flips the tile in a given direction
      *
-     * @param direction a direction to flip the tile in
+     * @param direction a direction to rotate the tile in
      */
-    public void flip(int direction) {
+    public void rotate(int direction) {
         int x = 0;
         int y = 0;
 
-        for (CellLocation cellLocation : contents) {
+        for (CellLocation cellLocation : tile) {
             x += cellLocation.getColumn();
             y += cellLocation.getRow();
         }
-        x /= contents.size();
-        y /= contents.size();
+        x /= tile.size();
+        y /= tile.size();
 
-        List<CellLocation> newCells = new ArrayList<>();
-        for (CellLocation location : contents) {
-            int lx = x + ((y - location.getRow()) * direction);
-            int ly = y + ((x - location.getColumn()) * direction);
-            CellLocation replacement = new CellLocation(ly, lx);
-            newCells.add(replacement);
+        List<CellLocation> newTile = new ArrayList<>();
+        for (CellLocation tilePart : tile) {
+            int newX = x + ((y - tilePart.getRow()) * direction);
+            int newY = y + ((x - tilePart.getColumn()) * direction);
+            CellLocation replacement = new CellLocation(newY, newX);
+            newTile.add(replacement);
         }
 
-        if (inBounds(newCells)) {
+        if (inBounds(newTile)) {
             unRender();
-            contents = newCells;
-            render(newCells);
+            tile = newTile;
+            render(newTile);
         }
     }
 
@@ -234,56 +238,48 @@ public class TetrosGame {
      * Creates a random new tile to drop
      */
     private void newPiece() {
-        int value = randomTile.pick();
-        switch (value) {
+        switch (randomTile.pick()) {
+            case 0 -> {
+                tile.add(new CellLocation(0, 0));
+                tile.add(new CellLocation(0, 1));
+                tile.add(new CellLocation(1, 1));
+                tile.add(new CellLocation(1, 2));
+                fallingType = 4;
+            }
             case 1 -> {
-                contents.add(new CellLocation(0, 0));
-                contents.add(new CellLocation(1, 0));
-                contents.add(new CellLocation(2, 0));
-                contents.add(new CellLocation(2, 1));
+                tile.add(new CellLocation(0, 0));
+                tile.add(new CellLocation(1, 0));
+                tile.add(new CellLocation(2, 0));
+                tile.add(new CellLocation(2, 1));
                 fallingType = 7;
             }
             case 2 -> {
-                contents.add(new CellLocation(0, 1));
-                contents.add(new CellLocation(1, 1));
-                contents.add(new CellLocation(2, 1));
-                contents.add(new CellLocation(2, 0));
+                tile.add(new CellLocation(0, 1));
+                tile.add(new CellLocation(1, 1));
+                tile.add(new CellLocation(2, 1));
+                tile.add(new CellLocation(2, 0));
                 fallingType = 5;
             }
             case 3 -> {
-                contents.add(new CellLocation(0, 0));
-                contents.add(new CellLocation(0, 1));
-                contents.add(new CellLocation(0, 2));
-                contents.add(new CellLocation(1, 1));
+                tile.add(new CellLocation(0, 0));
+                tile.add(new CellLocation(0, 1));
+                tile.add(new CellLocation(0, 2));
+                tile.add(new CellLocation(1, 1));
                 fallingType = 8;
             }
             case 4 -> {
-                contents.add(new CellLocation(0, 0));
-                contents.add(new CellLocation(0, 1));
-                contents.add(new CellLocation(1, 0));
-                contents.add(new CellLocation(1, 1));
+                tile.add(new CellLocation(0, 0));
+                tile.add(new CellLocation(0, 1));
+                tile.add(new CellLocation(1, 0));
+                tile.add(new CellLocation(1, 1));
                 fallingType = 3;
             }
             case 5 -> {
-                contents.add(new CellLocation(0, 0));
-                contents.add(new CellLocation(1, 0));
-                contents.add(new CellLocation(2, 0));
-                contents.add(new CellLocation(3, 0));
+                tile.add(new CellLocation(0, 0));
+                tile.add(new CellLocation(1, 0));
+                tile.add(new CellLocation(2, 0));
+                tile.add(new CellLocation(3, 0));
                 fallingType = 6;
-            }
-            case 6 -> {
-                contents.add(new CellLocation(0, 1));
-                contents.add(new CellLocation(0, 2));
-                contents.add(new CellLocation(1, 1));
-                contents.add(new CellLocation(0, 1));
-                fallingType = 2;
-            }
-            case 0 -> {
-                contents.add(new CellLocation(0, 0));
-                contents.add(new CellLocation(0, 1));
-                contents.add(new CellLocation(1, 1));
-                contents.add(new CellLocation(1, 2));
-                fallingType = 4;
             }
         }
     }

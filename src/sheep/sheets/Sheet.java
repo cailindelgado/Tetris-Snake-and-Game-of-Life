@@ -57,7 +57,7 @@ public class Sheet implements SheetView, SheetUpdate {
     }
 
     /**
-     * Clear the current sheet so that it contains the default
+     * clear the current sheet so that it contains the default
      * formula in every cell.
      */
     public void clear() {

@@ -11,7 +11,7 @@ import sheep.ui.*;
 public class Tetros implements Tick, Feature {
 
     private final Sheet sheet;
-    private final TetrosGame game;
+    private final TetrosG game;
     private boolean started = false;
 
     private final RandomTile randomTile;
@@ -33,7 +33,7 @@ public class Tetros implements Tick, Feature {
     public Tetros(Sheet sheet, RandomTile randomTile) {
         this.sheet = sheet;
         this.randomTile = randomTile;
-        game = new TetrosGame(sheet, randomTile);
+        game = new TetrosG(sheet, randomTile);
 
     }
 
@@ -45,7 +45,7 @@ public class Tetros implements Tick, Feature {
         ui.onKey("d", "Move Right", this.getMove(1, false));
         ui.onKey("q", "Rotate Left", this.getMove(-1, true));
         ui.onKey("e", "Rotate Right", this.getMove(1, true));
-        ui.onKey("s", "Drop", this.getMove(0, false));
+        ui.onKey("s", "drop", this.getMove(0, false));
     }
 
     @Override
@@ -79,7 +79,7 @@ public class Tetros implements Tick, Feature {
                     return;
                 }
                 if (rotate) {
-                    game.flip(direction);
+                    game.rotate(direction);
                 } else {
                     game.shift(direction);
                 }

@@ -14,3 +14,4 @@ There are 4 Components which need to be implemented
 - [ ] Component #4: Tetros
   - [X] Debugging
   - [ ] Refactor
+    - could there be a TetrosTile class, which the TetrosGame class uses?

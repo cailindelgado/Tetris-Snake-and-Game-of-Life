@@ -236,7 +236,7 @@ public class GUI extends UI {
 
         // Callback for whenever the highlighted cell changes.
         ListSelectionListener updateFormula = e -> {
-            // Clear the view when selecting headers.
+            // clear the view when selecting headers.
             if (table.getSelectedColumn() <= 0 || table.getSelectedRow() <= 0) {
                 formulaView.setText("");
                 return;
