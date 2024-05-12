@@ -17,14 +17,7 @@ import java.util.LinkedList;
 public class Snake implements Tick, Feature {
 
     //setup
-    private final Sheet sheet;
-    private final RandomCell randomCell;
-
-    //snake stuff
-    private final int[][] directions = {{-1, 0}, {0, -1}, {1, 0}, {0, 1}};
-    private int[] currentDirection = directions[2];
-    private final LinkedList<CellLocation> snakeBody = new LinkedList<>();
-    private boolean ate = false;
+    private final SnakeG game;
 
     //game stuff
     private boolean running = false;
@@ -33,13 +26,7 @@ public class Snake implements Tick, Feature {
         public void perform(int row, int column, Prompt prompt) {
             running = true;
 
-            //if no cell chosen start at 0,0
-            if (!sheet.contains(new CellLocation(row, column))) {
-                snakeBody.add(new CellLocation(0, 0));
-            } else {
-                snakeBody.add(new CellLocation(row, column));
-            }
-            sheet.update(snakeBody.getFirst().getRow(), snakeBody.getFirst().getColumn(), "1");
+            game.startingPos(row, column);
         }
     };
 
@@ -51,18 +38,17 @@ public class Snake implements Tick, Feature {
      *                   when one disappears on the sheet
      */
     public Snake(Sheet sheet, RandomCell randomCell) {
-        this.sheet = sheet;
-        this.randomCell = randomCell;
+        game = new SnakeG(sheet, randomCell);
     }
 
     @Override
     public void register(UI ui) {
         ui.onTick(this);
         ui.addFeature("snake", "Start Snake", startGame);
-        ui.onKey("w", "Move North", this.getMove(directions[0]));
-        ui.onKey("a", "Move West", this.getMove(directions[1]));
-        ui.onKey("s", "Move South", this.getMove(directions[2]));
-        ui.onKey("d", "Move East", this.getMove(directions[3]));
+        ui.onKey("w", "Move North", this.getMove(new int[]{-1, 0}));
+        ui.onKey("a", "Move West", this.getMove(new int[]{0, -1}));
+        ui.onKey("s", "Move South", this.getMove(new int[]{1, 0}));
+        ui.onKey("d", "Move East", this.getMove(new int[]{0, 1}));
     }
 
     @Override
@@ -71,12 +57,11 @@ public class Snake implements Tick, Feature {
             return false;
         }
 
-        if (!moveSnake()) {
+        if (!game.moveSnake()) {
             prompt.message("Game Over!");
             running = false;
         }
 
-        //will be return true when changes are done on the board.
         return true;
     }
 
@@ -93,55 +78,8 @@ public class Snake implements Tick, Feature {
                 if (!running) {
                     return;
                 }
-                currentDirection = direction;
+                game.setDirection(direction);
             }
         };
-    }
-
-    /**
-     * Passively moves the snake
-     *
-     * @return true, if the snake can be moved in that direction, false if the new location of
-     * the body part is not valid (i.e. head hits body part, or head hits wall).
-     */
-    private boolean moveSnake() {
-
-        CellLocation newLoc = new CellLocation(snakeBody.getFirst().getRow() + currentDirection[0],
-                snakeBody.getFirst().getColumn() + currentDirection[1]);
-
-        //ensuring new location is in the sheet, and that it is not another body part
-        if (!sheet.contains(newLoc) || sheet.valueAt(newLoc).render().equals("1")) {
-            return false;
-        }
-
-        //if the snake just ate something wait a tick before removing the last tile
-        if (!ate) {
-            sheet.update(snakeBody.getLast().getRow(), snakeBody.getLast().getColumn(), "");
-            snakeBody.removeLast();
-        } else {
-            ate = false;
-        }
-
-        if (!sheet.valueAt(newLoc).render().isEmpty()) {
-            ate = true;
-            newFood();
-        }
-
-        snakeBody.addFirst(newLoc);
-        sheet.update(newLoc.getRow(), newLoc.getColumn(), "1");
-
-        //if successful
-        return true;
-    }
-
-    /**
-     * Deals with the generation and handling of a new edible cell for the snake
-     */
-    private void newFood() {
-        CellLocation food = randomCell.pick();
-
-        if (!sheet.valueAt(food).render().equals("1")) {
-            sheet.update(food.getRow(), food.getColumn(), "2");
-        }
     }
 }
