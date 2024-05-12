@@ -149,7 +149,7 @@ public class TetrosG {
     /**
      * Horizontally translates the tile with the given direction
      *
-     * @param direction 0 if drop, 1 if shift right, -1 if shift left.
+     * @param direction 0 if dropping, 1 if shift right, -1 if shift left.
      */
     public void shift(int direction) {
         if (direction == 0) {
@@ -222,8 +222,8 @@ public class TetrosG {
     /**
      * checks if the given locations are within the sheet
      *
-     * @param locations a list of cell locations to check
-     * @return true if all locations are within the sheet, false otherwise
+     * @param locations a list of {@link CellLocation}'s  to check
+     * @return true if all {@link CellLocation}'s are within the sheet, false otherwise
      */
     public boolean inBounds(List<CellLocation> locations) {
         for (CellLocation location : locations) {

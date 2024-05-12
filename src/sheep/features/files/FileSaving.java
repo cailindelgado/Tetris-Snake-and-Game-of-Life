@@ -9,7 +9,7 @@ import sheep.ui.UI;
 import java.io.IOException;
 
 /**
- * Saves the current sheet state
+ * The UI for saving the current sheet state
  */
 public class FileSaving implements Feature {
 
