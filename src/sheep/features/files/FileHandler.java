@@ -11,7 +11,7 @@ import sheep.sheets.Sheet;
 import java.io.*;
 
 /**
- * Saves the current state of the sheet
+ * handles the loading and saving of a sheet's state from a file location
  */
 public class FileHandler {
 

@@ -9,7 +9,7 @@ import sheep.ui.UI;
 import java.io.IOException;
 
 /**
- * Loads the sheet with a pre-saved sheet state from {@link FileSaving}
+ * The UI for loading the current sheet state
  */
 public class FileLoading implements Feature {
 

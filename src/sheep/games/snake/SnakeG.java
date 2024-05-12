@@ -7,7 +7,7 @@ import sheep.sheets.Sheet;
 import java.util.LinkedList;
 
 /**
- * The Snake Game logic
+ * The game logic for the game Snake
  */
 public class SnakeG {
 
@@ -69,7 +69,18 @@ public class SnakeG {
             return false;
         }
 
-        //TODO lines 72 to 89 could be put into a food method.
+        newFood(newLoc);
+
+        snakeBody.addFirst(newLoc);
+        sheet.update(newLoc.getRow(), newLoc.getColumn(), "1");
+
+        return true;
+    }
+
+    /**
+     * Manages the snakes length along with the food spawning
+     */
+    private void newFood(CellLocation newLoc) {
         //if the snake just ate something wait a tick before removing the last tile
         if (!ate) {
             sheet.update(snakeBody.getLast().getRow(), snakeBody.getLast().getColumn(), "");
@@ -86,10 +97,5 @@ public class SnakeG {
                 sheet.update(food.getRow(), food.getColumn(), "2");
             }
         }
-
-        snakeBody.addFirst(newLoc);
-        sheet.update(newLoc.getRow(), newLoc.getColumn(), "1");
-
-        return true;
     }
 }
