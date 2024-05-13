@@ -10,11 +10,8 @@ import sheep.ui.*;
  */
 public class Tetros implements Tick, Feature {
 
-    private final Sheet sheet;
     private final TetrosG game;
     private boolean started = false;
-
-    private final RandomTile randomTile;
 
     private final Perform gameStart = new Perform() {
         @Override
@@ -31,8 +28,6 @@ public class Tetros implements Tick, Feature {
      * @param randomTile A randomTile object to generate random tiles with
      */
     public Tetros(Sheet sheet, RandomTile randomTile) {
-        this.sheet = sheet;
-        this.randomTile = randomTile;
         game = new TetrosG(sheet, randomTile);
 
     }

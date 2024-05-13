@@ -43,8 +43,8 @@ public class TetrosG {
 
         unRender();
 
-        for (CellLocation newLoc : newTile) {
-            if (stopper(newLoc)) { //newLoc is a new cell location
+        for (CellLocation tilePart : newTile) {
+            if (stopper(tilePart)) { //tilePart is a new cell location
                 render(tile);
                 return true;
             }
@@ -56,7 +56,7 @@ public class TetrosG {
     }
 
     /**
-     * Unrenders the tile when called
+     * Un-renders the tile list from the sheet when called
      */
     public void unRender() {
         for (CellLocation tilePart : tile) {
@@ -238,44 +238,41 @@ public class TetrosG {
      * Creates a random new tile to drop
      */
     private void newPiece() {
+        tile.add(new CellLocation(0, 0));
+        tile.add(new CellLocation(0, 1));
+
         switch (randomTile.pick()) {
             case 0 -> {
-                tile.add(new CellLocation(0, 0));
-                tile.add(new CellLocation(0, 1));
                 tile.add(new CellLocation(1, 1));
                 tile.add(new CellLocation(1, 2));
                 fallingType = 4;
             }
             case 1 -> {
-                tile.add(new CellLocation(0, 0));
+                tile.remove(1);
                 tile.add(new CellLocation(1, 0));
                 tile.add(new CellLocation(2, 0));
                 tile.add(new CellLocation(2, 1));
                 fallingType = 7;
             }
             case 2 -> {
-                tile.add(new CellLocation(0, 1));
+                tile.removeFirst();
                 tile.add(new CellLocation(1, 1));
                 tile.add(new CellLocation(2, 1));
                 tile.add(new CellLocation(2, 0));
                 fallingType = 5;
             }
             case 3 -> {
-                tile.add(new CellLocation(0, 0));
-                tile.add(new CellLocation(0, 1));
                 tile.add(new CellLocation(0, 2));
                 tile.add(new CellLocation(1, 1));
                 fallingType = 8;
             }
             case 4 -> {
-                tile.add(new CellLocation(0, 0));
-                tile.add(new CellLocation(0, 1));
                 tile.add(new CellLocation(1, 0));
                 tile.add(new CellLocation(1, 1));
                 fallingType = 3;
             }
             case 5 -> {
-                tile.add(new CellLocation(0, 0));
+                tile.remove(1);
                 tile.add(new CellLocation(1, 0));
                 tile.add(new CellLocation(2, 0));
                 tile.add(new CellLocation(3, 0));
