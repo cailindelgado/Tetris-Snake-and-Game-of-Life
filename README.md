@@ -11,7 +11,7 @@ There are 4 Components which need to be implemented
   - Bug list
   - [X] food spawns on top of snake sometimes
   - [X] fix Grade-scope failed test: food should spawn after snake 'head' lands on tile, within same tick
-- [ ] Component #4: Tetros
+- [ ] Component #4: Tetris
   - [X] Debugging
   - [ ] Refactor
-    - could there be a TetrosTile class, which the TetrosGame class uses?
+    - could potentially be a TetrosTile class, which the TetrosGame class uses
